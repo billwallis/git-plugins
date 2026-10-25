@@ -24,6 +24,11 @@ test = [
     "pytest>=9.1.1",
 ]
 
+[project.scripts]
+git-pr = "git_plugins.pull_request:main"
+git-squash-summary = "git_plugins.squash_summary:main"
+git-wrapup = "git_plugins.wrapup:main"
+
 
 [tool.poe]
 verbosity = -1
@@ -69,6 +74,9 @@ testpaths = ["tests"]
 [tool.coverage]
 run.source = ["src", "tests"]
 run.plugins = ["covdefaults"]  # https://youtu.be/70T6OxKwxm0
+report.omit = [
+    "src/git_plugins/_git.py",  # TODO: Test this!
+]
 report.fail_under = 80
 report.exclude_lines = [
     "@pytest.mark.skip",
