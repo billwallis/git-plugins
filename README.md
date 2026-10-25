@@ -15,6 +15,16 @@
 
 Plugins for Git.
 
+## Usage
+
+Install the project and expose the scripts to your `PATH`.
+
+For example, with [pipx](https://pipx.pypa.io/stable/):
+
+```shell
+pipx install git+https://github.com/billwallis/git-plugins
+```
+
 ## Contributing
 
 Install the dependencies:
