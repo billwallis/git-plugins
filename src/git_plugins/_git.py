@@ -63,7 +63,7 @@ def get_default_branch_name() -> str:
 
     default_branch_name = default_branch_names[0]
     if default_branch_name not in DEFAULT_BRANCH_NAMES:
-        warnings.warn(  # pragma: no cover
+        warnings.warn(
             f"'{default_branch_name}' detected as default branch, which is not one of {DEFAULT_BRANCH_NAMES}",
             stacklevel=1,
         )
