@@ -1,6 +1,7 @@
 import pathlib
 import subprocess
 import re
+import warnings
 from collections.abc import Iterable, Generator
 
 from git_plugins import _colours as colours
@@ -52,31 +53,22 @@ def get_current_branch_name() -> str:
 def get_default_branch_name() -> str:
     """
     Return the default branch for the current repository.
-
-    `git show-branch` shows the branches and across branches, for example:
-
-        * [bar] feat: and one more thing
-         ! [foo] feat: another thing
-          ! [main] Initial commit
-        ---
-        *   [bar] feat: and one more thing
-        *+  [foo] feat: another thing
-        *+  [foo^] feat: something else
-        *+  [foo~2] feat: something
-        *++ [main] Initial commit
-
-    We just take the final line and parse the name out of it.
     """
 
-    # TODO: Can we do something with:
-    #       git name-rev --name-only $(git show-branch --merge-base)
+    merge_bases = list(_run_git_cmd(("show-branch", "--merge-base")))
+    assert len(merge_bases) == 1, f"expected 1 merge base, found {len(merge_bases)}: {merge_bases}"
 
-    branch_lines = filter(lambda s: s.strip(), _run_git_cmd(("show-branch",)))
-    line = list(branch_lines)[-1]
-    match = re.search(r"\[([a-zA-Z0-9-]+)]", line)
-    assert match is not None, f"could not find branch name in line: {line}"
+    default_branch_names = list(_run_git_cmd(("name-rev", "--name-only", merge_bases[0])))
+    assert len(merge_bases) == 1, f"expected 1 default branch name, found {len(default_branch_names)}: {default_branch_names}"
 
-    return match.group(1)
+    default_branch_name = default_branch_names[0]
+    if default_branch_name not in DEFAULT_BRANCH_NAMES:
+        warnings.warn(  # pragma: no cover
+            f"'{default_branch_name}' detected as default branch, which is not one of {DEFAULT_BRANCH_NAMES}",
+            stacklevel=1,
+        )
+
+    return default_branch_name
 
 
 def get_remote_url() -> str:

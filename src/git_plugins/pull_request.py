@@ -46,11 +46,6 @@ def _github_pull_request_url_with_params(
     # intermediate branches (e.g. `main` -> `foo` -> `bar` would merge `bar`
     # into `main`)
     base_branch = git.get_default_branch_name()
-    if base_branch not in git.DEFAULT_BRANCH_NAMES:
-        warnings.warn(  # pragma: no cover
-            f"'{base_branch}' detected as default branch, which is not one of {git.DEFAULT_BRANCH_NAMES}",
-            stacklevel=1,
-        )
 
     return f"{host_url}/compare/{base_branch}...{branch_name}?{params}"
 
