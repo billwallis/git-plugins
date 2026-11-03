@@ -64,9 +64,12 @@ def get_default_branch_name() -> str:
     default_branch_name = default_branch_names[0]
     if default_branch_name not in DEFAULT_BRANCH_NAMES:
         warnings.warn(
-            f"'{default_branch_name}' detected as default branch, which is not one of {DEFAULT_BRANCH_NAMES}",
+            f"'{default_branch_name}' detected as default branch, which is not one of {DEFAULT_BRANCH_NAMES}. "
+            "Defaulting to `main`. "
+            "Replicate with `git name-rev --name-only $(git show-branch --merge-base)`",
             stacklevel=1,
         )
+        return "main"
 
     return default_branch_name
 
