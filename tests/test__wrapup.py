@@ -83,6 +83,81 @@ def test__wrapup__can_switch_delete_fetch_and_pull(
     )
 
 
+def test__wrapup__can_switch_delete_fetch_and_pull__with_different_base(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture,
+):
+    monkeypatch.setattr(
+        _git,
+        "get_status",
+        lambda: textwrap.dedent(
+            """\
+            On branch feature-branch
+            nothing to commit, working tree clean
+            """
+        ),
+    )
+    monkeypatch.setattr(
+        _git,
+        "get_current_branch_name",
+        lambda: "feature-branch",
+    )
+    monkeypatch.setattr(
+        _git,
+        "switch_branch",
+        lambda b, **_: (
+            "git switch master",
+            "Switched to branch '{b}'",
+            "Your branch is up to date with 'origin/{b}'.",
+        ),
+    )
+    monkeypatch.setattr(
+        _git,
+        "delete_branch",
+        lambda b, **_: (
+            f"git branch --delete {b} --force",
+            f"Deleted branch {b} (was abcd123).",
+        ),
+    )
+    monkeypatch.setattr(
+        _git,
+        "fetch",
+        lambda **_: ("git fetch --prune",),
+    )
+    monkeypatch.setattr(
+        _git,
+        "pull",
+        lambda **_: (
+            "git pull",
+            "Updating abcd123..xyz6789",
+            "Fast-forward",
+            " foo/bar.baz | 3 +++",
+            " 1 file changed, 3 insertions(+)",
+        ),
+    )
+
+    rc = main(["--base", "master"])
+    captured = capsys.readouterr()
+
+    assert rc == 0
+    assert captured.err == ""
+    assert captured.out == textwrap.dedent(
+        """\
+        git switch master
+        Switched to branch '{b}'
+        Your branch is up to date with 'origin/{b}'.
+        git branch --delete feature-branch --force
+        Deleted branch feature-branch (was abcd123).
+        git fetch --prune
+        git pull
+        Updating abcd123..xyz6789
+        Fast-forward
+         foo/bar.baz | 3 +++
+         1 file changed, 3 insertions(+)
+        """
+    )
+
+
 def test__wrapup__errors_when_repository_is_dirty(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture,
