@@ -10,6 +10,7 @@ from git_plugins import (
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--base", default="main")
     parser.add_argument(
         "--allow-dirty",
         action=argparse.BooleanOptionalAction,
@@ -28,7 +29,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(colours.colour("error: not on feature branch", colours.RED + colours.BOLD), file=sys.stderr)
         return 1
 
-    for line in git.switch_branch("main", print_cmd=True):
+    for line in git.switch_branch(args.base, print_cmd=True):
         print(line)
 
     for line in git.delete_branch(branch_name, force=True, print_cmd=True):
